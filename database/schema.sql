@@ -12,7 +12,7 @@ create table if not exists "user"
     name       varchar(30),
     surname    varchar(30),
     password   varchar,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create unique index if not exists users_email_uindex
@@ -49,7 +49,7 @@ create table if not exists user_feedback
             check ((rating >= 1) AND (rating <= 5)),
     title      varchar(120) not null,
     message    text,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create table if not exists category
@@ -63,7 +63,7 @@ create table if not exists category
             on delete cascade,
     name        varchar(100)                           not null,
     description text,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create table if not exists payment_method
@@ -76,9 +76,10 @@ create table if not exists payment_method
             references "user"
             on delete cascade,
     name        varchar(100) not null,
+    provider    varchar(100) not null,
     address     varchar(100) not null,
     description text,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create table if not exists transaction
@@ -99,10 +100,10 @@ create table if not exists transaction
             references payment_method
             on delete cascade,
     processed_at    date                     default now(),
-    receiver        varchar(80)      not null,
+    receiver        varchar(120)     not null,
     description     text,
     transfer_amount double precision not null,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create table if not exists subscription
@@ -126,10 +127,10 @@ create table if not exists subscription
     execute_at      integer                  default 1
         constraint subscription_execute_at_check
             check ((execute_at >= 1) AND (execute_at <= 31)),
-    receiver        varchar(80)      not null,
+    receiver        varchar(120)      not null,
     description     text,
     transfer_amount double precision not null,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 create table if not exists budget
@@ -146,7 +147,7 @@ create table if not exists budget
             references "user"
             on delete cascade,
     budget double precision not null,
-    created_at timestamp default current_timestamp
+    created_at timestamp with time zone default current_timestamp
 );
 
 /**
