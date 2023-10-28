@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  postgres:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${DATA_LOCATION:-./data}/postgres:/var/lib/postgresql/data
+    environment:
+      - TZ=${TZ:-Europe/Berlin}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    ports:
+      - '5432:5432'
+    networks:
+      - database
+      - backend
+
+  redis:
+    restart: always
+    image: redis:latest
+    command: bash -c "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
+    volumes:
+      - ${DATA_LOCATION:-./data}/redis:/data
+    ports:
+      - '6379:6379'
+    networks:
+      - database
+      - backend
+
+  backend:
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    image: ghcr.io/budget-buddy/backend:latest
+    ports:
+      - '8080:8080'
+    networks:
+      - database
+      - backend
+
+  # website:
+  #   restart: always
+  #   image: ghcr.io/budget-buddy/website:latest
+  #   ports:
+  #     - '3000:3000'
+
+  # webapp:
+  #   depends_on:
+  #     - backend
+  #   restart: always
+  #   image: ghcr.io/budget-buddy/webapp:latest
+  #   ports:
+  #     - '3080:3000'
+  #   networks:
+  #     - backend
+
+  # subscription_service:
+  #   depends_on:
+  #     - backend
+  #   restart: always
+  #   image: ghcr.io/budget-buddy/backend:latest
+  #   networks:
+  #     - backend
+
+networks:
+  database:
+  backend:
