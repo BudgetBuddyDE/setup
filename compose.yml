@@ -34,7 +34,14 @@ services:
       - postgres
       - redis
     restart: always
-    image: ghcr.io/budget-buddy/backend:latest
+    image: ghcr.io/budgetbuddyde/backend:latest
+    environment:
+      - PG_HOST=postgres
+      - PG_USER=${POSTGRES_USER}
+      - PG_PASSWORD=${POSTGRES_PW}
+      - PG_DB=${POSTGRES_DB}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - '8080:8080'
     networks:
@@ -43,7 +50,7 @@ services:
 
   # website:
   #   restart: always
-  #   image: ghcr.io/budget-buddy/website:latest
+  #   image: ghcr.io/budgetbuddyde/website:latest
   #   ports:
   #     - '3000:3000'
 
@@ -51,7 +58,7 @@ services:
   #   depends_on:
   #     - backend
   #   restart: always
-  #   image: ghcr.io/budget-buddy/webapp:latest
+  #   image: ghcr.io/budgetbuddyde/webapp:latest
   #   ports:
   #     - '3080:3000'
   #   networks:
@@ -61,7 +68,7 @@ services:
   #   depends_on:
   #     - backend
   #   restart: always
-  #   image: ghcr.io/budget-buddy/backend:latest
+  #   image: ghcr.io/budgetbuddyde/subscription-service:latest
   #   networks:
   #     - backend
 

@@ -99,7 +99,7 @@ create table if not exists transaction
         constraint transaction_payment_method_id_fk
             references payment_method
             on delete cascade,
-    processed_at    date                     default now(),
+    processed_at    timestamp with time zone       default now(),
     receiver        varchar(120)     not null,
     description     text,
     transfer_amount double precision not null,
