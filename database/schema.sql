@@ -153,3 +153,14 @@ create table if not exists budget
 /**
  * Views
  */
+create or replace view public.v_budget_progress as
+    select
+        *,
+        coalesce((select ABS(SUM(transaction.transfer_amount))
+            from transaction
+            where transaction.transfer_amount <= 0
+            and transaction.category = budget.category
+            and transaction.processed_at::DATE <= now()::DATE
+            and extract(month FROM transaction.processed_at) = extract(month FROM now())
+            and extract(year FROM transaction.processed_at) = extract(year FROM now())), 0) as amount_spent
+        from budget;
