@@ -150,6 +150,17 @@ create table if not exists budget
     created_at timestamp with time zone default current_timestamp
 );
 
+create table if not exists log 
+(
+    id serial constraint log_pk
+        primary key,
+    application varchar not null,
+    type varchar default 'LOG',
+    category varchar default 'uncategorized',
+    content text not null,
+    created_at timestamp with time zone default current_timestamp
+);
+
 /**
  * Views
  */
