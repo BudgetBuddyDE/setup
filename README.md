@@ -48,6 +48,97 @@ subgraph "Conusmer-Layer"
 end
 ```
 
+## Database
+
+```mermaid
+erDiagram
+  user {
+    uuid uuid PK
+    string email "UNIQUE"
+    varchar(30) name
+    varchar(30) surname
+    varchar password
+    timestamp created_at
+  }
+  user_avatar {
+    serial id PK
+    uuid owner FK
+    varchar file_name
+    varchar(20) mimetype
+    timestamp created_At
+  }
+  user_feedback {
+    serial id PK
+    uuid owner FK
+    int rating
+    varchar(120) title
+    text message
+    timestamp created_At
+  }
+  category {
+    serial id PK
+    uuid owner FK
+    varchar(100) name
+    text description
+    timestam created_at
+  }
+  payment_method {
+    serial id PK
+    uuid owner FK
+    varchar(100) name
+    varchar(100) provider
+    varchar(100) address
+    text description
+    timestamp created_at
+  }
+  transaction {
+    serial id PK
+    uuid owner FK
+    serial category FK
+    serial payment_method FK
+    timestamp processed_at
+    varchar(120) receiver
+    text description
+    double transfer_amount
+    timestamp created_at
+  }
+  subscription {
+    serial id PK
+    uuid owner FK
+    serial category FK
+    serial payment_method FK
+    boolean paused "Defaule false"
+    integer execute_at "between 1 and 31"
+    varchar(120) receiver
+    text description
+    double transfer_amount
+    timestamp created_at
+  }
+  budget {
+    serial id PK
+    serial category FK
+    uuid owner FK
+    double budget
+    timestamp created_at
+  }
+  log {
+    serial id PK
+    varchar application
+    varchar type "Default 'LOG'"
+    varchar category "Default 'uncategorized'"
+    text content
+    timestamp created_at
+  }
+  v_budget_progress {
+    serial id PK
+    serial category FK
+    uuid owner FK
+    double budget
+    timestamp created_at
+    double amount_spent
+  }
+```
+
 ## Getting started
 
 ### Local setup
