@@ -175,3 +175,32 @@ create or replace view public.v_budget_progress as
             and extract(month FROM transaction.processed_at) = extract(month FROM now())
             and extract(year FROM transaction.processed_at) = extract(year FROM now())), 0) as amount_spent
         from budget;
+
+/**
+ * Functions
+ */
+create function f_get_daily_transactions(start_date date, end_date date, requested_data text, user_id uuid)
+    returns TABLE(date date, amount double precision)
+    language sql
+as
+$$
+SELECT
+    dates.transaction_date as date,
+    (SELECT COALESCE(SUM(t.transfer_amount), 0)
+     FROM transaction t
+     WHERE t.owner = user_id
+       AND date_trunc('day', t.processed_at) = dates.transaction_date
+       AND requested_data = TRIM(requested_data)
+       AND (
+             (requested_data = 'INCOME' AND t.transfer_amount >= 0)
+             OR (requested_data = 'SPENDINGS' AND t.transfer_amount <= 0)
+             OR (requested_data = 'BALANCE')
+         ))
+FROM (
+         SELECT generate_series(start_date, end_date, '1 day') AS transaction_date
+     ) AS dates
+GROUP BY
+    dates.transaction_date
+ORDER BY
+    dates.transaction_date ASC;
+$$;
