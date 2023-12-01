@@ -11,40 +11,72 @@ title: Budget-Buddy Infrastructure
 ---
 flowchart TD
 
-style bucket fill:#FF7276;
-style bucket color:#fff;
+style mail-service fill:#FF7276;
+style mail-service color:#fff;
 style file-service fill:#FF7276;
 style file-service color:#fff;
+style file-analyzer-service fill:#FF7276;
+style file-analyzer-service color:#fff;
 style feedback-service fill:#FF7276;
 style feedback-service color:#fff;
+style resend fill:#FF7276;
+style resend color:#fff;
+style storage fill:#FF7276;
+style storage color:#fff;
+
+webapp[Webapp]
+website[Website]
+subscription-service[Subscription-Service]
+mail-service[Mail-Service]
+feedback-service[Feedback-Service]
+file-service[File-Service]
+file-analyzer-service[File-Analyzer Service]
+backend[Backend]
+gh-api[GitHub GraphQL]
+resend[Resend]
+postgres[(Postgres)]
+redis[(Redis)]
+storage[Bucket/Storage]
+
+click website href "https://github.com/BudgetBuddyDE/Website"
+click webapp href "https://github.com/BudgetBuddyDE/Webapp"
+click subscription-service href "https://github.com/BudgetBuddyDE/Subscription-Service"
+click mail-service href "https://resend.com/"
+click file-service href "https://github.com/kleithor/file-service"
+click backend href "https://github.com/BudgetBuddyDE/Backend"
 
 subgraph "Database"
-  postgres[(Postgres)]
-  redis[(Redis)]
+  postgres
+  redis
 end
 
-subgraph "File Storage/Bucket"
-  bucket[Bucket/Storage]
+subgraph "Files/Storage"
+  storage
 end
 
 subgraph "3rd Party Service"
-  gh-api[GitHub GraphQL]
+  gh-api
+  resend
 end
 
 subgraph "Communication-Layer"
-  postgres <--> backend[Backend]
-  redis <--> backend[Backend]
-  bucket <--> file-service[File-Service]
-  postgres <--> feedback-service[Feedback-Service]
+  backend<-->postgres
+  backend<-->redis
+  feedback-service
+  mail-service<-->resend
+  file-analyzer-service
+  file-service<-->storage
 end
 
-subgraph "Conusmer-Layer"
-  gh-api -->|Retrieve repositories| website[Website]
-  backend <-->|View & Maintain| webapp[Webapp]
-  file-service <-->|View & Maintain| webapp[Webapp]
-  backend <-->|Select & Insert| sub-service[Subscription-Service]
-  feedback-service --> website
-  feedback-service <--> webapp
+subgraph "Consumer-Layer"
+  website<-->feedback-service
+  website-->gh-api
+  website-->mail-service
+  webapp<-->feedback-service
+  webapp-->mail-service
+  webapp<-->backend
+  webapp<-->file-service
+  subscription-service<-->backend
 end
 ```
 
