@@ -3,6 +3,23 @@ set time zone 'Europe/Berlin';
 /**
  * Tables
  */
+create table if not exists role
+(
+    id          serial
+        constraint role_pk
+            primary key,
+    role        varchar(20) not null,
+    description text,
+    permissions int default 100,
+    created_at timestamp with time zone default current_timestamp
+);
+
+insert into public.role (id, role, description, permissions, created_at)
+values
+  (default, 'Basic', 'For members', 100, default),
+  (default, 'Service-Account', 'For internal services', 200, default),
+  (default, 'Admin', null, 1000, default);
+
 create table if not exists "user"
 (
     uuid       uuid                     default gen_random_uuid() not null
@@ -55,23 +72,6 @@ create table if not exists user_feedback
     message    text,
     created_at timestamp with time zone default current_timestamp
 );
-
-create table if not exists role
-(
-    id          serial
-        constraint role_pk
-            primary key,
-    role        varchar(20) not null,
-    description text,
-    permissions int default 100,
-    created_at timestamp with time zone default current_timestamp
-);
-
-insert into public.role (id, role, description, permissions, created_at)
-values
-  (default, 'Basic', 'For members', 100, default),
-  (default, 'Service-Account', 'For internal services', 200, default),
-  (default, 'Admin', null, 1000, default);
 
 create table if not exists category
 (
