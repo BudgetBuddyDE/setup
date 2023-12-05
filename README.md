@@ -178,3 +178,6 @@ erDiagram
 ### Docker
 
 ## Deployment
+
+> [!IMPORTANT]
+> Make sure to grant access permission to the `restart_service.sh` with `sudo chown user:group restart_service.sh` and make the script executeable with `chmod +x restart_service.sh`
