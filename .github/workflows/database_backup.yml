@@ -1,0 +1,42 @@
+name: Database Backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+    
+jobs:
+  download-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Extract files
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /home/bb_app/data/
+            zip -r /home/bb_app/postgres.zip postgres/
+            zip -r /home/bb_app/redis.zip redis/
+            ls /home/bb_app
+      - name: Download files
+        run: |
+          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/postgres.zip
+          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/redis.zip
+          ls
+      - name: Upload postgres
+        uses: actions/upload-artifact@v2
+        with:
+          name: postgres
+          path: postgres.zip
+          retention-days: 7
+
+      - name: Upload redis
+        uses: actions/upload-artifact@v2
+        with:
+          name: redis
+          path: redis.zip
+          retention-days: 7
