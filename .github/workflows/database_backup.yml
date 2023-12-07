@@ -18,25 +18,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /home/bb_app/data/
-            zip -r /home/bb_app/postgres.zip postgres/
-            zip -r /home/bb_app/redis.zip redis/
-            ls /home/bb_app
+            cd /home/bb_app
+            sudo zip -r /home/bb_app/data.zip data/
       - name: Download files
         run: |
-          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/postgres.zip
-          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/redis.zip
-          ls
+          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/data.zip
       - name: Upload postgres
         uses: actions/upload-artifact@v2
         with:
-          name: postgres
-          path: postgres.zip
-          retention-days: 7
-
-      - name: Upload redis
-        uses: actions/upload-artifact@v2
-        with:
-          name: redis
-          path: redis.zip
+          name: data
+          path: data.zip
           retention-days: 7
