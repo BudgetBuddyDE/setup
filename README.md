@@ -173,9 +173,21 @@ erDiagram
 
 ## Getting started
 
-### Local setup
+1. Log into the Github Image Registry
 
-### Docker
+```bash
+echo <GH_PAT> | docker login ghcr.io -u <GH_USER> --password-stdin
+```
+
+Now you should be able to pull Docker images from Github
+
+### Docker-Compose
+
+```
+docker-compose up -d
+# or just the essential services
+docker-compose up -d postgres redis backend subscription-service
+```
 
 ## Deployment
 
