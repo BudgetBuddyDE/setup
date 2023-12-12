@@ -1,4 +1,4 @@
-set time zone 'Europe/Berlin';
+set time zone 'UTC+1';
 
 /**
  * Tables
