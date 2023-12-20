@@ -36,6 +36,9 @@ create table if not exists "user"
     created_at timestamp with time zone default current_timestamp
 );
 
+alter table "user"
+    add column is_verified boolean default false;
+
 create unique index if not exists users_email_uindex
     on "user" (email);
 
