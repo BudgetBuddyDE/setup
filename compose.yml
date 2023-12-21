@@ -43,27 +43,12 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+      - MAIL_SERVICE_HOST=${MAIL_SERVICE_HOST}
     ports:
       - '8080:8080'
     networks:
       - database
       - backend
-
-  # website:
-  #   restart: always
-  #   image: ghcr.io/budgetbuddyde/website:latest
-  #   ports:
-  #     - '3000:3000'
-
-  # webapp:
-  #   depends_on:
-  #     - backend
-  #   restart: always
-  #   image: ghcr.io/budgetbuddyde/webapp:latest
-  #   ports:
-  #     - '3080:3000'
-  #   networks:
-  #     - backend
 
   subscription_service:
     depends_on:
@@ -72,8 +57,22 @@ services:
     image: ghcr.io/budgetbuddyde/subscription-service:latest
     environment:
       - BACKEND_URL=${BACKEND_URL}
-      - SERVICE_UUID=${SERVICE_UUID}
-      - SERVICE_PASSWORD=${SERVICE_PASSWORD}
+      - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
+      - SERVICE_PASSWORD=${SUBSCRIPTION_SERVICE_PASSWORD}
+    networks:
+      - backend
+
+  mail_service:
+    depends_on:
+      - backend
+    restart: always
+    image: ghcr.io/budgetbuddyde/mail-service:latest
+    environment:
+      - ENV=PROD
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - BACKEND_URL=${BACKEND_URL}
+      - SERVICE_UUID=${MAIL_SERVICE_UUID}
+      - SERVICE_PASSWORD=${MAIL_SERVICE_PASSWORD}
     networks:
       - backend
 
