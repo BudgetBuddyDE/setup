@@ -73,6 +73,8 @@ services:
       - BACKEND_URL=${BACKEND_URL}
       - SERVICE_UUID=${MAIL_SERVICE_UUID}
       - SERVICE_PASSWORD=${MAIL_SERVICE_PASSWORD}
+    ports:
+      - '8090:8090'
     networks:
       - backend
 
