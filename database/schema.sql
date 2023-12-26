@@ -42,6 +42,21 @@ alter table "user"
 create unique index if not exists users_email_uindex
     on "user" (email);
 
+create table if not exists user_password_reset
+(
+    id         serial                                not null
+        constraint user_password_reset_pk
+            primary key,
+    owner      uuid                                  not null
+        constraint user_password_reset_user_uuid_fk
+            references "user",
+    otp        uuid        default gen_random_uuid() not null
+        constraint user_password_reset_unique_otp
+            unique,
+    used       bool        default false             not null,
+    created_at timestamptz default current_timestamp not null
+);
+
 create table if not exists user_avatar
 (
     id         serial
