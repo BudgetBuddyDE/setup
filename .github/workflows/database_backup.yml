@@ -1,4 +1,4 @@
-name: Backup Postgres Database
+name: Backup Databases
 
 on:
   workflow_dispatch:
@@ -6,8 +6,8 @@ on:
     - cron: '0 4 * * *'
 
 jobs:
-  backup:
-    name: Backup database
+  backup_postgres:
+    name: Backup Postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -30,6 +30,35 @@ jobs:
       - name: Upload backup to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: Database backup
+          name: Postgres Backup
           path: backup.sql
+          retention-days: 90
+  backup_redis:
+    name: Backup Redis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Connect to server
+        uses: appleboy/ssh-action@v1.0.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /home/bb_app
+            docker exec "${{ vars.REDIS_CONTAINER }}" bash -c "
+            redis-cli -a '${{ secrets.REDIS_PASSWORD }}' SAVE
+            "
+            sudo cp /home/bb_app/data/redis/dump.rdb .
+            sudo zip redis_backup.zip dump.rdb
+      - name: Download files
+        run: |
+          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/redis_backup.zip
+          unzip redis_backup.zip
+      - name: Upload backup to GitHub
+        uses: actions/upload-artifact@v2
+        with:
+          name: Redis Backup
+          path: dump.rdb
           retention-days: 90
