@@ -1,31 +1,35 @@
-name: Database Backup
+name: Backup Postgres Database
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
-    
+    - cron: '0 4 * * *'
+
 jobs:
-  download-files:
+  backup:
+    name: Backup database
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Check out repo
         uses: actions/checkout@v3
-      - name: Extract files
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Connect to server
+        uses: appleboy/ssh-action@v1.0.1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /home/bb_app
-            sudo zip -r /home/bb_app/data.zip data/
+            docker exec "${{ vars.DB_CONTAINER }}" bash -c "
+            PGPASSWORD='${{ secrets.DB_PASSWORD }}' pg_dump -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_DATABASE }} > /var/lib/postgresql/data/backup.sql
+            "
+            sudo cp /home/bb_app/data/postgres/backup.sql .
       - name: Download files
         run: |
-          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/data.zip
-      - name: Upload postgres
+          wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/backup.sql
+      - name: Upload backup to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: data
-          path: data.zip
-          retention-days: 7
+          name: Database backup
+          path: backup.sql
+          retention-days: 90
