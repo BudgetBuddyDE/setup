@@ -78,6 +78,23 @@ services:
     networks:
       - backend
 
+  file_service:
+    depends_on:
+      - backend
+    restart: always
+    image: ghcr.io/budgetbuddyde/file-service:latest
+    environment:
+      - ENV=production
+      - UPLOAD_DIR=uploads/
+      - BACKEND_HOST=http://backend:8080
+      - PORT=8180
+    volumes:
+      - ${FILE_SERVICE_DATA_LOCATION:-./data}/uploads:/usr/src/app/uploads
+    ports:
+      - '8180:8180'
+    networks:
+      - backend
+
 networks:
   database:
   backend:
