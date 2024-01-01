@@ -1,6 +1,22 @@
 # Setup
 
-## Infrastructure (WIP)
+## ToC
+
+- [Setup](#setup)
+  - [ToC](#toc)
+  - [Infrastructure](#infrastructure)
+    - [Services](#services)
+    - [Database](#database)
+  - [Getting started](#getting-started)
+    - [Docker-Compose](#docker-compose)
+  - [Deployment](#deployment)
+  - [Backups](#backups)
+    - [Postgres](#postgres)
+    - [Redis](#redis)
+
+## Infrastructure
+
+### Services
 
 > [!NOTE]
 > Boxes in red are "planned" features and not iomplemented in the current version (therefore not in set-up during deployment)
@@ -11,18 +27,10 @@ title: Budget-Buddy Infrastructure
 ---
 flowchart TD
 
-style mail-service fill:#FF7276;
-style mail-service color:#fff;
-style file-service fill:#FF7276;
-style file-service color:#fff;
 style file-analyzer-service fill:#FF7276;
 style file-analyzer-service color:#fff;
 style feedback-service fill:#FF7276;
 style feedback-service color:#fff;
-style resend fill:#FF7276;
-style resend color:#fff;
-style storage fill:#FF7276;
-style storage color:#fff;
 
 webapp[Webapp]
 website[Website]
@@ -36,13 +44,13 @@ gh-api[GitHub GraphQL]
 resend[Resend]
 postgres[(Postgres)]
 redis[(Redis)]
-storage[Bucket/Storage]
+storage[Bucket/Storage/Volume]
 
 click website href "https://github.com/BudgetBuddyDE/Website"
 click webapp href "https://github.com/BudgetBuddyDE/Webapp"
 click subscription-service href "https://github.com/BudgetBuddyDE/Subscription-Service"
-click mail-service href "https://resend.com/"
-click file-service href "https://github.com/kleithor/file-service"
+click mail-service href "https://github.com/BudgetBuddyDE/Mail-Service"
+click file-service href "https://github.com/BudgetBuddyDE/File-Service"
 click backend href "https://github.com/BudgetBuddyDE/Backend"
 
 subgraph "Database"
@@ -80,104 +88,17 @@ subgraph "Consumer-Layer"
 end
 ```
 
-## Database
+### Database
 
-```mermaid
-erDiagram
-  user {
-    uuid uuid PK
-    string email "UNIQUE"
-    varchar(30) name
-    varchar(30) surname
-    varchar password
-    timestamp created_at
-  }
-  user_avatar {
-    serial id PK
-    uuid owner FK
-    varchar file_name
-    varchar(20) mimetype
-    timestamp created_At
-  }
-  user_feedback {
-    serial id PK
-    uuid owner FK
-    int rating
-    varchar(120) title
-    text message
-    timestamp created_At
-  }
-  category {
-    serial id PK
-    uuid owner FK
-    varchar(100) name
-    text description
-    timestam created_at
-  }
-  payment_method {
-    serial id PK
-    uuid owner FK
-    varchar(100) name
-    varchar(100) provider
-    varchar(100) address
-    text description
-    timestamp created_at
-  }
-  transaction {
-    serial id PK
-    uuid owner FK
-    serial category FK
-    serial payment_method FK
-    timestamp processed_at
-    varchar(120) receiver
-    text description
-    double transfer_amount
-    timestamp created_at
-  }
-  subscription {
-    serial id PK
-    uuid owner FK
-    serial category FK
-    serial payment_method FK
-    boolean paused "Defaule false"
-    integer execute_at "between 1 and 31"
-    varchar(120) receiver
-    text description
-    double transfer_amount
-    timestamp created_at
-  }
-  budget {
-    serial id PK
-    serial category FK
-    uuid owner FK
-    double budget
-    timestamp created_at
-  }
-  log {
-    serial id PK
-    varchar application
-    varchar type "Default 'LOG'"
-    varchar category "Default 'uncategorized'"
-    text content
-    timestamp created_at
-  }
-  v_budget_progress {
-    serial id PK
-    serial category FK
-    uuid owner FK
-    double budget
-    timestamp created_at
-    double amount_spent
-  }
-```
+![](./database/db.png)
 
 ## Getting started
 
 1. Log into the Github Image Registry
 
-```bash
-echo <GH_PAT> | docker login ghcr.io -u <GH_USER> --password-stdin
-```
+   ```bash
+   echo <GH_PAT> | docker login ghcr.io -u <GH_USER> --password-stdin
+   ```
 
 Now you should be able to pull Docker images from Github
 
@@ -193,3 +114,21 @@ docker-compose up -d postgres redis backend subscription-service
 
 > [!IMPORTANT]
 > Make sure to grant access permission to the `restart_service.sh` with `sudo chown user:group restart_service.sh` and make the script executeable with `chmod +x restart_service.sh`
+
+## Backups
+
+### Postgres
+
+**How to restore backed up data?**
+
+```bash
+psql -U <DB_USER> <DB_NAME> < backup.sql
+```
+
+### Redis
+
+**How to restore backed up data?**
+
+```bash
+
+```
