@@ -1,0 +1,21 @@
+name: Rebuild Databases
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rebuild_postgres:
+    name: Backup Postgres
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Connect to server
+        uses: appleboy/ssh-action@v1.0.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd "${{ vars.REMOTE_LOCATION }}/setup"
+            ./rebuild_database.sh "${{ vars.DB_CONTAINER }}"
