@@ -200,6 +200,25 @@ create table if not exists log
     created_at timestamp with time zone default current_timestamp
 );
 
+create table if not exists transaction_file (
+    uuid       uuid                     default gen_random_uuid() not null
+        constraint transaction_file_pk
+            primary key,
+    owner           uuid             not null
+        constraint transaction_file_user_uuid_fk
+            references "user"
+            on delete cascade,
+    transaction        serial
+        constraint transaction_file_transaction__fk
+            references transaction
+            on delete cascade,
+    file_name  varchar     not null,
+    file_size  integer     not null,
+    mimetype   varchar(20) not null,
+    location   varchar(100) not null,
+    created_at timestamp with time zone default current_timestamp
+);
+
 /**
  * Views
  */
