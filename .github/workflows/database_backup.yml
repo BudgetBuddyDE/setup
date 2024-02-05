@@ -9,48 +9,58 @@ jobs:
   backup_postgres:
     name: Backup Postgres
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [production, development]
+    environment:
+      name: ${{ matrix.environment }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
-      - name: Connect to server
+      - name: Connect to ${{ matrix.environment }}-server
         uses: appleboy/ssh-action@v1.0.1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /home/bb_app
+            cd /home/bb_app/${{ matrix.environment }}/
             docker exec "${{ vars.DB_CONTAINER }}" bash -c "
             PGPASSWORD='${{ secrets.DB_PASSWORD }}' pg_dump -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_DATABASE }} > /var/lib/postgresql/data/backup.sql
             "
-            sudo cp /home/bb_app/data/postgres/backup.sql .
+            sudo cp /home/bb_app/${{ matrix.environment }}/data/postgres/backup.sql .
       - name: Download files
         run: |
           wget -q ftp://'${{ secrets.USERNAME }}':'${{ secrets.PASSWORD }}'@${{ secrets.HOST }}/backup.sql
       - name: Upload backup to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: Postgres Backup
+          name: 'postgres_${{matrix.environment}}_backup'
           path: backup.sql
           retention-days: 90
   backup_redis:
     name: Backup Redis
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [production, development]
+    environment:
+      name: ${{ matrix.environment }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
-      - name: Connect to server
+      - name: Connect to ${{ matrix.environment }}-server
         uses: appleboy/ssh-action@v1.0.1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /home/bb_app
+            cd /home/bb_app/
             docker exec "${{ vars.REDIS_CONTAINER }}" bash -c "
             redis-cli -a '${{ secrets.REDIS_PASSWORD }}' SAVE
             "
-            sudo cp /home/bb_app/data/redis/dump.rdb .
+            sudo cp /home/bb_app/${{ matrix.environment }}/data/redis/dump.rdb .
             sudo zip redis_backup.zip dump.rdb
       - name: Download files
         run: |
@@ -59,6 +69,6 @@ jobs:
       - name: Upload backup to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: Redis Backup
+          name: 'redis_${{matrix.environment}}_backup'
           path: dump.rdb
           retention-days: 90

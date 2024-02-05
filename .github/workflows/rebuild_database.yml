@@ -2,11 +2,17 @@ name: Rebuild Databases
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Select the environment
 
 jobs:
   rebuild_postgres:
     name: Backup Postgres
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -17,5 +23,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd "${{ vars.REMOTE_LOCATION }}/setup"
-            ./rebuild_database.sh "${{ vars.DB_CONTAINER }}"
+            cd "${{ vars.REMOTE_LOCATION }}"
+            ../rebuild_database.sh "${{ inputs.environment }}" "${{ vars.DB_CONTAINER }}"

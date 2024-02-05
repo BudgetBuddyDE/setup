@@ -1,0 +1,100 @@
+version: '3.8'
+services:
+  postgres:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - TZ=${TZ:-Europe/Berlin}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    ports:
+      - '5432:5432'
+    networks:
+      - database
+      - backend
+
+  redis:
+    restart: always
+    image: redis:latest
+    command: bash -c "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - '6379:6379'
+    networks:
+      - database
+      - backend
+
+  backend:
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    image: ghcr.io/budgetbuddyde/backend:latest
+    environment:
+      - PG_HOST=postgres
+      - PG_USER=${POSTGRES_USER}
+      - PG_PASSWORD=${POSTGRES_PW}
+      - PG_DB=${POSTGRES_DB:-postgres}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+      - MAIL_SERVICE_HOST=http://mail_service:8090
+    ports:
+      - '8080:8080'
+    networks:
+      - database
+      - backend
+
+  # subscription_service:
+  #   depends_on:
+  #     - backend
+  #   restart: always
+  #   image: ghcr.io/budgetbuddyde/subscription-service:latest
+  #   environment:
+  #     - BACKEND_URL=http://backend:8080
+  #     - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
+  #     - SERVICE_PASSWORD=${SUBSCRIPTION_SERVICE_PASSWORD}
+  #   networks:
+  #     - backend
+
+  mail_service:
+    depends_on:
+      - backend
+    restart: always
+    image: ghcr.io/budgetbuddyde/mail-service:latest
+    environment:
+      - ENV=PROD
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - BACKEND_HOST=http://backend:8080
+      - SERVICE_USER_UUID=${MAIL_SERVICE_UUID}
+      - SERVICE_USER_PASSWORD=${MAIL_SERVICE_PASSWORD}
+    ports:
+      - '8070:8090'
+    networks:
+      - backend
+
+  file_service:
+    depends_on:
+      - backend
+    restart: always
+    image: ghcr.io/budgetbuddyde/file-service:latest
+    environment:
+      - ENV=production
+      - UPLOAD_DIR=uploads/
+      - BACKEND_HOST=http://backend:8080
+      - PORT=8180
+    volumes:
+      - ${FILE_SERVICE_DATA_LOCATION:-./data}/uploads:/usr/src/app/uploads
+    ports:
+      - '8090:8180'
+    networks:
+      - backend
+
+networks:
+  database:
+  backend:

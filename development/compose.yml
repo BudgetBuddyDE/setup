@@ -4,15 +4,15 @@ services:
     restart: always
     image: postgres:latest
     volumes:
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ${DATA_LOCATION:-./data}/postgres:/var/lib/postgresql/data
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/postgres:/var/lib/postgresql/data
     environment:
       - TZ=${TZ:-Europe/Berlin}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PW}
       - POSTGRES_DB=${POSTGRES_DB:-postgres}
     ports:
-      - '5432:5432'
+      - '5532:5432'
     networks:
       - database
       - backend
@@ -22,9 +22,9 @@ services:
     image: redis:latest
     command: bash -c "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
     volumes:
-      - ${DATA_LOCATION:-./data}/redis:/data
+      - ./data/redis:/data
     ports:
-      - '6379:6379'
+      - '6479:6379'
     networks:
       - database
       - backend
@@ -39,28 +39,28 @@ services:
       - PG_HOST=postgres
       - PG_USER=${POSTGRES_USER}
       - PG_PASSWORD=${POSTGRES_PW}
-      - PG_DB=${POSTGRES_DB}
+      - PG_DB=${POSTGRES_DB:-postgres}
       - REDIS_HOST=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-      - MAIL_SERVICE_HOST=${MAIL_SERVICE_HOST}
+      - MAIL_SERVICE_HOST=http://mail_service:8090
     ports:
-      - '8080:8080'
+      - '8081:8080'
     networks:
       - database
       - backend
 
-  subscription_service:
-    depends_on:
-      - backend
-    restart: always
-    image: ghcr.io/budgetbuddyde/subscription-service:latest
-    environment:
-      - BACKEND_URL=${BACKEND_URL}
-      - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
-      - SERVICE_PASSWORD=${SUBSCRIPTION_SERVICE_PASSWORD}
-    networks:
-      - backend
+  # subscription_service:
+  #   depends_on:
+  #     - backend
+  #   restart: always
+  #   image: ghcr.io/budgetbuddyde/subscription-service:latest
+  #   environment:
+  #     - BACKEND_URL=http://backend:8080
+  #     - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
+  #     - SERVICE_PASSWORD=${SUBSCRIPTION_SERVICE_PASSWORD}
+  #   networks:
+  #     - backend
 
   mail_service:
     depends_on:
@@ -70,11 +70,11 @@ services:
     environment:
       - ENV=PROD
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - BACKEND_HOST=${BACKEND_URL}
+      - BACKEND_HOST=http://backend:8080
       - SERVICE_USER_UUID=${MAIL_SERVICE_UUID}
       - SERVICE_USER_PASSWORD=${MAIL_SERVICE_PASSWORD}
     ports:
-      - '8090:8090'
+      - '8071:8090'
     networks:
       - backend
 
@@ -91,7 +91,7 @@ services:
     volumes:
       - ${FILE_SERVICE_DATA_LOCATION:-./data}/uploads:/usr/src/app/uploads
     ports:
-      - '8180:8180'
+      - '8091:8180'
     networks:
       - backend
 
