@@ -1,12 +1,22 @@
 # /bin/bash
 
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <IMAGE> <SERVICE>"
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 <production|development> <IMAGE> <SERVICE>"
   exit 1
 fi
 
-IMAGE="$1"
-SERVICE="$2"
+ENVIRONMENT="$1"
+IMAGE="$2"
+SERVICE="$3"
+
+if [ ! -d "$ENVIRONMENT" ]; then
+  echo "Error: Environment directory '$ENVIRONMENT' does not exist."
+  exit 1
+fi
+
+cd "$ENVIRONMENT"
+
+echo "restarting the service '$SERVICE' on '$ENVIRONMENT'"
 
 if [ "$(docker ps -a --filter "name=$SERVICE" --format '{{.Names}}')" ]; then
   docker-compose stop $SERVICE
