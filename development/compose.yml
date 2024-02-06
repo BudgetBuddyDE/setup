@@ -34,7 +34,7 @@ services:
       - postgres
       - redis
     restart: always
-    image: ghcr.io/budgetbuddyde/backend:latest
+    image: ghcr.io/budgetbuddyde/backend:latest-dev
     environment:
       - PG_HOST=postgres
       - PG_USER=${POSTGRES_USER}
@@ -54,7 +54,7 @@ services:
   #   depends_on:
   #     - backend
   #   restart: always
-  #   image: ghcr.io/budgetbuddyde/subscription-service:latest
+  #   image: ghcr.io/budgetbuddyde/subscription-service:latest-dev
   #   environment:
   #     - BACKEND_URL=http://backend:8080
   #     - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
@@ -66,13 +66,14 @@ services:
     depends_on:
       - backend
     restart: always
-    image: ghcr.io/budgetbuddyde/mail-service:latest
+    image: ghcr.io/budgetbuddyde/mail-service:latest-dev
     environment:
       - ENV=PROD
       - RESEND_API_KEY=${RESEND_API_KEY}
       - BACKEND_HOST=http://backend:8080
       - SERVICE_USER_UUID=${MAIL_SERVICE_UUID}
       - SERVICE_USER_PASSWORD=${MAIL_SERVICE_PASSWORD}
+      - PORT=8090
     ports:
       - '8071:8090'
     networks:
@@ -82,7 +83,7 @@ services:
     depends_on:
       - backend
     restart: always
-    image: ghcr.io/budgetbuddyde/file-service:latest
+    image: ghcr.io/budgetbuddyde/file-service:latest-dev
     environment:
       - ENV=production
       - UPLOAD_DIR=uploads/

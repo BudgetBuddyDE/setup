@@ -73,6 +73,7 @@ services:
       - BACKEND_HOST=http://backend:8080
       - SERVICE_USER_UUID=${MAIL_SERVICE_UUID}
       - SERVICE_USER_PASSWORD=${MAIL_SERVICE_PASSWORD}
+      - PORT=8090
     ports:
       - '8070:8090'
     networks:

@@ -206,7 +206,7 @@ end
 ## Deployment
 
 > [!IMPORTANT]
-> Make sure to grant access permission to the `restart_service.sh` with `sudo chown user:group restart_service.sh` and make the script executeable with `chmod +x restart_service.sh`
+> Make sure to grant access permission to the `rebuild_database.sh` with `sudo chown user:group rebuild_database.sh` and make the script executeable with `chmod +x rebuild_database.sh`
 
 ## Backups
 
