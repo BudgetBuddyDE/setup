@@ -219,6 +219,11 @@ create table if not exists transaction_file (
     created_at timestamp with time zone default current_timestamp
 );
 
+-- Patch: 07.02.2024 by @tklein1801
+-- Increase the size of location
+alter table transaction_file
+    alter column location type varchar(255);
+
 /**
  * Views
  */

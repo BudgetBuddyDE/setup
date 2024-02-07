@@ -88,6 +88,7 @@ services:
       - ENV=production
       - UPLOAD_DIR=uploads/
       - BACKEND_HOST=http://backend:8080
+      - HOST_URL=${HOST_URL}
       - PORT=8180
     volumes:
       - ${FILE_SERVICE_DATA_LOCATION:-./data}/uploads:/usr/src/app/uploads
