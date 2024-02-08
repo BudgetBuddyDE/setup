@@ -37,7 +37,7 @@ create table if not exists "user"
 );
 
 alter table "user"
-    add column is_verified boolean default false;
+    add column if not exists is_verified boolean default false;
 
 create unique index if not exists users_email_uindex
     on "user" (email);
@@ -189,7 +189,7 @@ create table if not exists budget
     created_at timestamp with time zone default current_timestamp
 );
 
-create table if not exists log 
+create table if not exists log
 (
     id serial constraint log_pk
         primary key,
@@ -242,7 +242,7 @@ create or replace view public.v_budget_progress as
 /**
  * Functions
  */
-create function f_get_daily_transactions(start_date date, end_date date, requested_data text, user_id uuid)
+create or replace function f_get_daily_transactions(start_date date, end_date date, requested_data text, user_id uuid)
     returns TABLE(date date, amount double precision)
     language sql
 as
