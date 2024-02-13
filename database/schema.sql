@@ -224,6 +224,41 @@ create table if not exists transaction_file (
 alter table transaction_file
     alter column location type varchar(255);
 
+create table if not exists stock_exchange (
+    symbol varchar(5) constraint stock_exchange_pk
+        primary key,
+    name varchar(100) not null,
+    exchange varchar(100) not null,
+    country varchar(100) not null,
+    created_at timestamp with time zone default current_timestamp
+);
+
+insert into stock_exchange (symbol, name, exchange, country, created_at)
+values
+    ('LSX', 'Lang & Schwarz Exchange', 'langschwarz', 'Germany', default),
+    ('GTX', 'Gettex', 'gettex', 'Germany', default),
+    ('FRA', 'Frankfurter Wertpapierbörse', 'frankfurt', 'Germany', default),
+    ('STU', 'Börse Stuttgart', 'stuttgart', 'Germany', default);
+
+create table if not exists stock_position (
+    id serial constraint stock_position_pk
+        primary key,
+    owner uuid not null
+        constraint stock_position_user_uuid_fk
+            references "user"
+            on delete cascade,
+    bought_at date not null,
+    exchange varchar(5) not null
+        constraint stock_position_stock_exchange_symbol_fk
+            references stock_exchange
+            on delete cascade,
+    isin varchar(12) not null,
+    buy_in double precision not null,
+    currency varchar(3) default 'EUR' not null,
+    quantity double precision not null,
+    created_at timestamp with time zone default current_timestamp
+);
+
 /**
  * Views
  */
