@@ -50,18 +50,6 @@ services:
       - database
       - backend
 
-  # subscription_service:
-  #   depends_on:
-  #     - backend
-  #   restart: always
-  #   image: ghcr.io/budgetbuddyde/subscription-service:latest-dev
-  #   environment:
-  #     - BACKEND_URL=http://backend:8080
-  #     - SERVICE_UUID=${SUBSCRIPTION_SERVICE_UUID}
-  #     - SERVICE_PASSWORD=${SUBSCRIPTION_SERVICE_PASSWORD}
-  #   networks:
-  #     - backend
-
   mail_service:
     depends_on:
       - backend
