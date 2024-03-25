@@ -85,6 +85,25 @@ services:
     networks:
       - backend
 
+  stock_service:
+    depends_on:
+      - backend
+      - database
+    restart: always
+    image: ghcr.io/budgetbuddyde/stock-service:latest-dev
+    environment: 
+      - ENV=production
+      - PORT=7070
+      - BACKEND_HOST=http://backend:8080
+      - STOCK_API_URL=${STOCK_SERVICE_STOCK_API_URL}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PW}@postgres:5432/${POSTGRES_DB}
+      - ENABLE_BACKGROUND_JOBS=true
+    ports: 
+      - '7080:7070'
+    networks: 
+      - backend
+      - database
+
 networks:
   database:
   backend:
