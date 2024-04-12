@@ -11,9 +11,6 @@
     - [Services](#services)
     - [Overview](#overview)
   - [Deployment](#deployment)
-  - [Backups](#backups)
-    - [Postgres](#postgres)
-    - [Redis](#redis)
 
 ## Getting started
 
@@ -64,10 +61,10 @@
   <tbody>
     <!-- Production -->
     <tr>
-      <td rowspan="3">
+      <td rowspan="2">
         <strong>Production</strong>
       </td>
-      <td>Backend</td>
+      <td>Pocketbase</td>
       <td>
         <code>8080</code>
       </td>
@@ -76,52 +73,34 @@
       </td>
     </tr>
     <tr>
-      <td>Mail-Service</td>
+      <td>Stock-Service</td>
+      <td>
+        <code>7070</code>
+      </td>
+      <td>
+        <code>7070</code>
+      </td> 
+    </tr>
+    <!-- DEVELOPMENT -->
+    <tr>
+      <td rowspan="2">
+        <strong>Development</strong>
+      </td>
+      <td>Pocketbase</td>
       <td>
         <code>8070</code>
       </td>
       <td>
-        <code>8090</code>
-      </td>
-    </tr>
-    <tr>
-      <td>File-Service</td>
-      <td>
-        <code>8090</code>
-      </td>
-      <td>
-        <code>8180</code>
-      </td>
-    </tr>
-    <!-- DEVELOPMENT -->
-    <tr>
-      <td rowspan="4">
-        <strong>Development</strong>
-      </td>
-      <td>Backend</td>
-      <td>
-        <code>8081</code>
-      </td>
-      <td>
         <code>8080</code>
       </td>
     </tr>
     <tr>
-      <td>Mail-Service</td>
+      <td>Stock-Service</td>
       <td>
-        <code>8071</code>
+        <code>7080</code>
       </td>
       <td>
-        <code>8090</code>
-      </td>
-    </tr>
-    <tr>
-      <td>File-Service</td>
-      <td>
-        <code>8091</code>
-      </td>
-      <td>
-        <code>8180</code>
+        <code>7070</code>
       </td>
     </tr>
   </tbody>
@@ -207,21 +186,3 @@ end
 
 > [!IMPORTANT]
 > Make sure to grant access permission to the `rebuild_database.sh` with `sudo chown user:group rebuild_database.sh` and make the script executeable with `chmod +x rebuild_database.sh`
-
-## Backups
-
-### Postgres
-
-**How to restore backed up data?**
-
-```bash
-psql -U <DB_USER> <DB_NAME> < backup.sql
-```
-
-### Redis
-
-**How to restore backed up data?**
-
-```bash
-redis-cli -h <HOST> -p <PORT> (-a <PASSWORD>) --pipe < dump.rdb
-```

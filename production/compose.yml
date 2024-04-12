@@ -1,108 +1,47 @@
 version: '3.8'
 services:
-  postgres:
+  pocketbase:
     restart: always
-    image: postgres:latest
-    volumes:
-      - ../database/schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./data/postgres:/var/lib/postgresql/data
-    environment:
-      - TZ=${TZ:-Europe/Berlin}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PW}
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
-    ports:
-      - '5432:5432'
-    networks:
-      - database
-      - backend
-
-  redis:
-    restart: always
-    image: redis:latest
-    command: bash -c "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
-    volumes:
-      - ./data/redis:/data
-    ports:
-      - '6379:6379'
-    networks:
-      - database
-      - backend
-
-  backend:
-    depends_on:
-      - postgres
-      - redis
-    restart: always
-    image: ghcr.io/budgetbuddyde/backend:latest
-    environment:
-      - PG_HOST=postgres
-      - PG_USER=${POSTGRES_USER}
-      - PG_PASSWORD=${POSTGRES_PW}
-      - PG_DB=${POSTGRES_DB:-postgres}
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-      - MAIL_SERVICE_HOST=http://mail_service:8090
+    build:
+      context: .
+      dockerfile: Dockerfile.pocketbase
     ports:
       - '8080:8080'
+    volumes:
+      - ./data:/pb/data
     networks:
-      - database
-      - backend
+      - pocketbase
 
-  mail_service:
+  subscription_service:
     depends_on:
-      - backend
+      - pocketbase
     restart: always
-    image: ghcr.io/budgetbuddyde/mail-service:latest
-    environment:
-      - ENV=PROD
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - BACKEND_HOST=http://backend:8080
-      - SERVICE_USER_UUID=${MAIL_SERVICE_UUID}
-      - SERVICE_USER_PASSWORD=${MAIL_SERVICE_PASSWORD}
-      - PORT=8090
-    ports:
-      - '8070:8090'
-    networks:
-      - backend
-
-  file_service:
-    depends_on:
-      - backend
-    restart: always
-    image: ghcr.io/budgetbuddyde/file-service:latest
+    image: ghcr.io/budgetbuddyde/subscription-service:latest
     environment:
       - ENV=production
-      - UPLOAD_DIR=uploads/
-      - BACKEND_HOST=http://backend:8080
-      - HOST_URL=${HOST_URL}
-      - PORT=8180
-    volumes:
-      - ${FILE_SERVICE_DATA_LOCATION:-./data}/uploads:/usr/src/app/uploads
-    ports:
-      - '8090:8180'
+      - POCKETBASE_URL=${POCKETBASE_URL}
+      - SERVICE_ACCOUNT_EMAIL=${SUBSCRIPTION_SERVICE_SERVICE_ACCOUNT_EMAIL}
+      - SERVICE_ACCOUNT_PASSWORD=${SUBSCRIPTION_SERVICE_SERVICE_ACCOUNT_PASSWORD}
     networks:
-      - backend
+      - pocketbase
 
   stock_service:
     depends_on:
-      - backend
-      - postgres
+      - pocketbase
     restart: always
     image: ghcr.io/budgetbuddyde/stock-service:latest
     environment:
       - ENV=production
       - PORT=7070
-      - BACKEND_HOST=http://backend:8080
+      - POCKETBASE_URL=${POCKETBASE_URL}
+      - SERVICE_ACCOUNT_EMAIL=${STOCK_SERVICE_SERVICE_ACCOUNT_EMAIL}
+      - SERVICE_ACCOUNT_PASSWORD=${STOCK_SERVICE_SERVICE_ACCOUNT_PASSWORD}
       - STOCK_API_URL=${STOCK_SERVICE_STOCK_API_URL}
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PW}@postgres:5432/${POSTGRES_DB}
       - ENABLE_BACKGROUND_JOBS=true
     ports:
       - '7070:7070'
     networks:
-      - backend
+      - pocketbase
 
 networks:
-  database:
-  backend:
+  pocketbase:
